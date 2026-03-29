@@ -1,31 +1,23 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 from src.config.settings import setting
 from src.api import health, response
 import uvicorn 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("Backend is initialized successfully...")
+    yield
+    print("System is shutting down successfully...")
 
 app = FastAPI(
     title=setting.project_name,
     description=setting.project_description,
     version=setting.project_version,
-    debug=setting.debug_mode
+    debug=setting.debug_mode,
+    lifespan=lifespan
 )
-
-@app.on_event("startup")
-async def startup():
-    print("Backend is initilized successfully...")
-    return {
-        "message" : "NOVA ASSISSTANT BACKEND IS INITILIZED SUCCESSFULLY",
-        "status" : "running"
-    }
-
-@app.on_event("shutdown")
-async def shutdown():
-    print("system is shutting down succesfully")
-    return {
-        "message"  : "NOVA ASSISTANT BACKEND IS SHUTDOWN",
-        "status" : "shutdown"
-    }
 
 app.add_middleware(
     CORSMiddleware,
